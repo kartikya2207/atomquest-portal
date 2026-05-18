@@ -28,13 +28,25 @@ const TeamCheckins: React.FC = () => {
     },
   });
 
-  const { data: goals, isLoading } = useQuery<Goal[]>({
-    queryKey: ["teamGoals"],
+  const { data: checkinData, isLoading } = useQuery<any[]>({
+    queryKey: ["teamCheckins"],
     queryFn: async () => {
-      const response = await client.get("/goals/team");
+      const response = await client.get("/checkins/team");
       return response.data;
     },
   });
+
+  React.useEffect(() => {
+    if (checkinData) {
+      const initialComments: Record<number, string> = {};
+      checkinData.forEach((item) => {
+        if (item.comment) {
+          initialComments[item.goal_id] = item.comment;
+        }
+      });
+      setComments(initialComments);
+    }
+  }, [checkinData]);
 
   // Simple logic to get current quarter for demo
   const activeQuarter = "q1";
@@ -50,14 +62,12 @@ const TeamCheckins: React.FC = () => {
 
   if (isLoading) return <div>Loading...</div>;
 
-  const approvedGoals = goals?.filter(g => g.status === 'approved' || g.status === 'locked') || [];
-  
   // Group goals by employee
-  const goalsByEmployee = approvedGoals.reduce((acc, goal) => {
-    if (!acc[goal.employee_id]) acc[goal.employee_id] = [];
-    acc[goal.employee_id].push(goal);
+  const goalsByEmployee = checkinData?.reduce((acc, item) => {
+    if (!acc[item.employee_id]) acc[item.employee_id] = [];
+    acc[item.employee_id].push(item);
     return acc;
-  }, {} as Record<number, Goal[]>);
+  }, {} as Record<number, any[]>) || {};
 
   const handleSaveCheckin = (goalId: number) => {
     const comment = comments[goalId];
@@ -77,7 +87,7 @@ const TeamCheckins: React.FC = () => {
         return (
           <Card key={employeeId}>
             <CardHeader>
-              <CardTitle>{employee?.name || "Unknown Employee"}</CardTitle>
+              <CardTitle>{employee?.name || employeeGoals[0].employee_name}</CardTitle>
               <CardDescription>{employee?.designation}</CardDescription>
             </CardHeader>
             <CardContent>
@@ -86,30 +96,31 @@ const TeamCheckins: React.FC = () => {
                   <TableRow>
                     <TableHead>Goal</TableHead>
                     <TableHead>Target</TableHead>
-                    <TableHead>Actual (TBD)</TableHead>
-                    <TableHead>Score (TBD)</TableHead>
+                    <TableHead>Actual</TableHead>
+                    <TableHead>Score</TableHead>
                     <TableHead className="w-1/3">Feedback</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {employeeGoals.map((goal) => (
-                    <TableRow key={goal.id}>
+                    <TableRow key={goal.goal_id}>
                       <TableCell className="font-medium">{goal.title}</TableCell>
                       <TableCell>{goal.uom_type === 'timeline' ? goal.target_date : goal.target_value}</TableCell>
-                      <TableCell>—</TableCell>
-                      <TableCell>—</TableCell>
+                      <TableCell>{goal.actual_value !== null ? goal.actual_value : "—"}</TableCell>
+                      <TableCell>{goal.score_percent !== null ? `${goal.score_percent}%` : "—"}</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
                           <Textarea 
                             placeholder="Add a comment..." 
                             className="h-10 min-h-[40px]"
-                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setComments({ ...comments, [goal.id]: e.target.value })}
+                            value={comments[goal.goal_id] || ""}
+                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setComments({ ...comments, [goal.goal_id]: e.target.value })}
                           />
                           <Button 
                             variant="ghost" 
                             size="icon"
-                            onClick={() => handleSaveCheckin(goal.id)}
-                            disabled={!comments[goal.id] || checkinMutation.isPending}
+                            onClick={() => handleSaveCheckin(goal.goal_id)}
+                            disabled={!comments[goal.goal_id] || checkinMutation.isPending}
                           >
                             <Save className="w-4 h-4" />
                           </Button>
@@ -124,7 +135,7 @@ const TeamCheckins: React.FC = () => {
         );
       })}
 
-      {approvedGoals.length === 0 && (
+      {checkinData?.length === 0 && (
         <div className="flex flex-col items-center justify-center h-64 bg-white rounded-lg border border-dashed text-gray-500">
           <MessageSquare className="w-12 h-12 mb-4" />
           <p>No approved goals yet. Approve your team's goals to start check-ins.</p>
