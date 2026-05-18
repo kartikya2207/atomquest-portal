@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import client from "../../api/client";
-import { Goal, User } from "../../types";
+import { User } from "../../types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
@@ -63,7 +63,7 @@ const TeamCheckins: React.FC = () => {
   if (isLoading) return <div>Loading...</div>;
 
   // Group goals by employee
-  const goalsByEmployee = checkinData?.reduce((acc, item) => {
+  const goalsByEmployee: Record<number, any[]> = checkinData?.reduce((acc, item) => {
     if (!acc[item.employee_id]) acc[item.employee_id] = [];
     acc[item.employee_id].push(item);
     return acc;
@@ -82,7 +82,7 @@ const TeamCheckins: React.FC = () => {
         <p className="text-gray-500">Monitor performance and provide feedback for {activeQuarter.toUpperCase()}</p>
       </div>
 
-      {Object.entries(goalsByEmployee).map(([employeeId, employeeGoals]) => {
+      {Object.entries(goalsByEmployee).map(([employeeId, employeeGoals]: [string, any[]]) => {
         const employee = team?.find(u => u.id === parseInt(employeeId));
         return (
           <Card key={employeeId}>
@@ -102,7 +102,7 @@ const TeamCheckins: React.FC = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {employeeGoals.map((goal) => (
+                  {employeeGoals.map((goal: any) => (
                     <TableRow key={goal.goal_id}>
                       <TableCell className="font-medium">{goal.title}</TableCell>
                       <TableCell>{goal.uom_type === 'timeline' ? goal.target_date : goal.target_value}</TableCell>
