@@ -1,4 +1,4 @@
-# AtomQuest — Goal Setting & Tracking Portal
+# AtomQuest — Goal Setting & Tracking Portal for Atomberg Technologies
 
 ## Live URL
 [https://atomquest-portal-theta.vercel.app](https://atomquest-portal-theta.vercel.app)
@@ -12,27 +12,27 @@
 
 ## Tech Stack
 - **Backend:** FastAPI (Python)
-- **Frontend:** React, TypeScript, Vite
-- **Styling:** TailwindCSS, shadcn/ui
+- **Frontend:** React 18, TypeScript, Vite
+- **Styling:** TailwindCSS v3, shadcn/ui
 - **Database:** PostgreSQL (Supabase)
 - **Hosting (Backend):** Railway
 - **Hosting (Frontend):** Vercel
-- **Charts:** Recharts
 - **State Management:** TanStack Query
+- **Charts:** Recharts
 
 ## Features
-- **Goal Setting:** Support for 4 UoM types (Numeric Min/Max, Percent Min/Max, Timeline, Zero-incident).
-- **Approval Workflow:** Full employee submission → manager approval/return workflow.
-- **Quarterly Check-ins:** Log achievements within specific quarterly windows.
-- **Score Computation:** Automatic score calculation based on business rules for each UoM.
-- **Shared Goals:** Propagate goals from Admin/Managers to team members.
-- **Audit Trail:** Comprehensive logging of all changes to approved goals.
-- **Analytics Dashboard:** Org-health, QoQ performance, Dept performance, Thrust area focus, and Completion heatmap.
-- **Excel Reports:** Download achievement reports in .xlsx format.
-- **Email Notifications:** Automated alerts for goal submissions, approvals, and returns.
+- **Goal Setting:** 4 UoM types (Numeric Min/Max, Timeline, Zero-based).
+- **Manager Approval Workflow:** Employee submission → manager approval/return cycle.
+- **Quarterly Check-ins:** Achievement logging within quarterly windows.
+- **Score Computation:** Business-rule based automatic scoring per UoM.
+- **Shared Goals with Sync:** Propagate and synchronize goals from Admin/Managers.
+- **Audit Trail:** Detailed history of changes to approved goals.
+- **Analytics Dashboard:** 4 interactive charts (QoQ, Dept, Thrust Area, Heatmap).
+- **Reports:** Downloadable Excel and CSV achievement reports.
+- **Email Notifications:** Automated alerts via Resend for workflow transitions.
 
 ## Architecture
-- **Frontend:** Hosted on Vercel (React SPA).
-- **Backend:** Hosted on Railway (FastAPI REST API).
-- **Database:** Managed PostgreSQL on Supabase.
-- **Email:** Resend integration.
+- **Frontend:** Hosted on **Vercel** (React 18).
+- **Backend:** Hosted on **Railway** (FastAPI).
+- **Database:** Managed **Supabase** (PostgreSQL).
+- **Service Tier:** All components are hosted on **Free Tiers**.
