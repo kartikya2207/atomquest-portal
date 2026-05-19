@@ -21,10 +21,10 @@ const goalSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().optional(),
   uom_type: z.enum(["numeric_min", "numeric_max", "percent_min", "percent_max", "timeline", "zero"] as const),
-  target_value: z.number().optional(),
+  target_value: z.coerce.number().optional(),
   target_date: z.string().optional(),
-  weightage: z.number().min(10, "Minimum weightage is 10").max(100, "Maximum weightage is 100"),
-  thrust_area_id: z.number().min(1, "Please select a thrust area"),
+  weightage: z.coerce.number().min(10, "Minimum weightage is 10").max(100, "Maximum weightage is 100"),
+  thrust_area_id: z.coerce.number().min(1, "Please select a thrust area"),
 });
 
 export type GoalFormValues = z.infer<typeof goalSchema>;
@@ -91,13 +91,17 @@ const GoalForm: React.FC<GoalFormProps> = ({ onSubmit, initialValues, thrustArea
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Thrust Area</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value?.toString()} disabled={isShared}>
+                <Select 
+                  onValueChange={field.onChange} 
+                  value={field.value?.toString()} 
+                  disabled={isShared}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select thrust area" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
+                  <SelectContent className="z-[99999]">
                     {thrustAreas.map((ta) => (
                       <SelectItem key={ta.id} value={ta.id.toString()}>
                         {ta.name}
@@ -116,13 +120,17 @@ const GoalForm: React.FC<GoalFormProps> = ({ onSubmit, initialValues, thrustArea
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Unit of Measure (UoM)</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isShared}>
+                <Select 
+                  onValueChange={field.onChange} 
+                  value={field.value} 
+                  disabled={isShared}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select UoM" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
+                  <SelectContent className="z-[99999]">
                     <SelectItem value="numeric_min">Numeric (Min is better)</SelectItem>
                     <SelectItem value="numeric_max">Numeric (Max is better)</SelectItem>
                     <SelectItem value="percent_min">Percent (Min is better)</SelectItem>
