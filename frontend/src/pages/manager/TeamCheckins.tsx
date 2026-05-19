@@ -107,7 +107,7 @@ const TeamCheckins: React.FC = () => {
                       <TableCell className="font-medium">{goal.title}</TableCell>
                       <TableCell>{goal.uom_type === 'timeline' ? goal.target_date : goal.target_value}</TableCell>
                       <TableCell>{goal.actual_value !== null ? goal.actual_value : "—"}</TableCell>
-                      <TableCell>{goal.score_percent !== null ? `${goal.score_percent}%` : "—"}</TableCell>
+                      <TableCell>{goal.score_percent !== null ? `${parseFloat(goal.score_percent).toFixed(1)}%` : "—"}</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
                           <Textarea 

@@ -136,14 +136,14 @@ const Analytics: React.FC = () => {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="quarter" />
                   <YAxis domain={[0, 100]} />
-                  <Tooltip />
+                  <Tooltip formatter={(v: number) => [`${v.toFixed(1)}%`, "Avg Score %"]} />
                   <Legend />
-                  <Line 
-                    type="monotone" 
-                    dataKey="score" 
-                    stroke="#ea580c" 
-                    strokeWidth={3} 
-                    dot={{ r: 6 }} 
+                  <Line
+                    type="monotone"
+                    dataKey="score"
+                    stroke="#ea580c"
+                    strokeWidth={3}
+                    dot={{ r: 6 }}
                     activeDot={{ r: 8 }}
                     name="Avg Score %"
                   />
@@ -168,7 +168,7 @@ const Analytics: React.FC = () => {
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                   <XAxis type="number" domain={[0, 100]} />
                   <YAxis dataKey="dept" type="category" width={100} />
-                  <Tooltip />
+                  <Tooltip formatter={(v: number) => [`${v.toFixed(1)}%`, "Avg Score %"]} />
                   <Bar dataKey="score" fill="#ea580c" radius={[0, 4, 4, 0]} name="Avg Score %" />
                 </BarChart>
               </ResponsiveContainer>
