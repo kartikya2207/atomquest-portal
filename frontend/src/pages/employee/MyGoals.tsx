@@ -32,6 +32,15 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, Edit2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
+const UOM_LABELS: Record<string, string> = {
+  numeric_min: "Higher is Better",
+  numeric_max: "Lower is Better",
+  percent_min: "Higher is Better",
+  percent_max: "Lower is Better",
+  timeline: "Timeline",
+  zero: "Zero Target",
+};
+
 const MyGoals: React.FC = () => {
   const queryClient = useQueryClient();
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -178,8 +187,13 @@ const MyGoals: React.FC = () => {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-500 uppercase">Status</CardTitle>
-            <CardDescription className="text-2xl font-bold text-gray-900">
-              {goals?.every(g => g.status === 'draft') ? 'Drafting' : 'Mixed'}
+            <CardDescription className="text-2xl font-bold text-gray-900 capitalize">
+              {goals && goals.length > 0
+                ? (() => {
+                    const statuses = new Set(goals.map(g => g.status));
+                    return statuses.size === 1 ? [...statuses][0] : "Mixed";
+                  })()
+                : "—"}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -204,7 +218,7 @@ const MyGoals: React.FC = () => {
                 <TableRow key={goal.id}>
                   <TableCell className="font-medium">{goal.title}</TableCell>
                   <TableCell>{thrustAreas?.find(ta => ta.id === goal.thrust_area_id)?.name}</TableCell>
-                  <TableCell className="capitalize">{goal.uom_type.replace('_', ' ')}</TableCell>
+                  <TableCell>{UOM_LABELS[goal.uom_type] ?? goal.uom_type}</TableCell>
                   <TableCell>
                     {goal.uom_type === 'timeline' ? goal.target_date : goal.target_value}
                   </TableCell>

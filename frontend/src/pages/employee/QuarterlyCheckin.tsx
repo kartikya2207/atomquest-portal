@@ -10,6 +10,15 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Clock } from "lucide-react";
 
+const UOM_LABELS: Record<string, string> = {
+  numeric_min: "Higher is Better",
+  numeric_max: "Lower is Better",
+  percent_min: "Higher is Better",
+  percent_max: "Lower is Better",
+  timeline: "Timeline",
+  zero: "Zero Target",
+};
+
 const QuarterlyCheckin: React.FC = () => {
   const queryClient = useQueryClient();
   const { data: cycle, isLoading: isCycleLoading } = useCurrentCycle();
@@ -100,7 +109,7 @@ const QuarterlyCheckin: React.FC = () => {
                   <CardTitle className="text-lg">{goal.title}</CardTitle>
                   <CardDescription>Target: {goal.uom_type === 'timeline' ? goal.target_date : goal.target_value} • Weightage: {goal.weightage}%</CardDescription>
                 </div>
-                <Badge className="capitalize">{goal.uom_type.replace('_', ' ')}</Badge>
+                <Badge>{UOM_LABELS[goal.uom_type] ?? goal.uom_type}</Badge>
               </div>
             </CardHeader>
             <CardContent>
