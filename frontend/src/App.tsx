@@ -17,7 +17,7 @@ import Reports from "./pages/admin/Reports";
 import ThrustAreas from "./pages/admin/ThrustAreas";
 import AppShell from "./components/layout/AppShell";
 import { Toaster } from "@/components/ui/sonner";
-import ErrorBoundary from "./components/ErrorBoundary";
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 const queryClient = new QueryClient();
 
