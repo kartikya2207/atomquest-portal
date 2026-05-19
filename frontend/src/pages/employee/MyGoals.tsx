@@ -110,14 +110,14 @@ const MyGoals: React.FC = () => {
     },
   });
 
-  const totalWeightage = goals?.reduce((sum, goal) => sum + goal.weightage, 0) || 0;
-  const draftReturnedGoals = goals?.filter(g => g.status === 'draft' || g.status === 'returned') || [];
-  const draftWeightage = draftReturnedGoals.reduce((sum, g) => sum + g.weightage, 0);
+  const totalWeightage = goals?.reduce((sum, goal) => sum + (goal?.weightage || 0), 0) || 0;
+  const draftReturnedGoals = goals?.filter(g => g?.status === 'draft' || g?.status === 'returned') || [];
+  const draftWeightage = draftReturnedGoals.reduce((sum, g) => sum + (g?.weightage || 0), 0);
   const isSubmitEnabled = draftWeightage === 100 && draftReturnedGoals.length > 0 && (goals?.length || 0) <= 8;
 
   const handleAddGoal = async (values: GoalFormValues) => {
     try {
-      if (!cycle) {
+      if (!cycle?.id) {
         toast.error("No active cycle found");
         return;
       }
@@ -129,7 +129,7 @@ const MyGoals: React.FC = () => {
 
   const handleUpdateGoal = async (values: GoalFormValues) => {
     try {
-      if (!editingGoal) return;
+      if (!editingGoal?.id) return;
       await updateMutation.mutateAsync({ id: editingGoal.id, data: values });
     } catch (error) {
       console.error("Error in handleUpdateGoal:", error);
@@ -137,7 +137,11 @@ const MyGoals: React.FC = () => {
   };
 
   if (isCycleLoading || isGoalsLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
+      </div>
+    );
   }
 
   if (!cycle) {
@@ -155,7 +159,7 @@ const MyGoals: React.FC = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">My Goals</h1>
-          <p className="text-gray-500">{cycle.name} Cycle</p>
+          <p className="text-gray-500">{cycle?.name} Cycle</p>
         </div>
         <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
           <DialogTrigger asChild>
@@ -201,7 +205,7 @@ const MyGoals: React.FC = () => {
             <CardDescription className="text-2xl font-bold text-gray-900 capitalize">
               {goals && goals.length > 0
                 ? (() => {
-                    const statuses = new Set(goals.map(g => g.status));
+                    const statuses = new Set(goals.filter(g => g?.status).map(g => g.status));
                     return statuses.size === 1 ? [...statuses][0] : "Mixed";
                   })()
                 : "—"}
@@ -226,25 +230,25 @@ const MyGoals: React.FC = () => {
             </TableHeader>
             <TableBody>
               {goals?.map((goal) => (
-                <TableRow key={goal.id}>
-                  <TableCell className="font-medium">{goal.title}</TableCell>
-                  <TableCell>{thrustAreas?.find(ta => ta.id === goal.thrust_area_id)?.name}</TableCell>
-                  <TableCell>{UOM_LABELS[goal.uom_type] ?? goal.uom_type}</TableCell>
+                <TableRow key={goal?.id}>
+                  <TableCell className="font-medium">{goal?.title}</TableCell>
+                  <TableCell>{thrustAreas?.find(ta => ta.id === goal?.thrust_area_id)?.name || 'N/A'}</TableCell>
+                  <TableCell>{goal?.uom_type ? (UOM_LABELS[goal.uom_type] || goal.uom_type) : 'N/A'}</TableCell>
                   <TableCell>
-                    {goal.uom_type === 'timeline' ? goal.target_date : goal.target_value}
+                    {goal?.uom_type === 'timeline' ? goal?.target_date : goal?.target_value}
                   </TableCell>
-                  <TableCell>{goal.weightage}%</TableCell>
+                  <TableCell>{goal?.weightage}%</TableCell>
                   <TableCell>
                     <Badge variant={
-                      goal.status === 'draft' ? 'secondary' :
-                      goal.status === 'submitted' ? 'default' :
-                      goal.status === 'approved' || goal.status === 'locked' ? 'outline' : 'destructive'
+                      goal?.status === 'draft' ? 'secondary' :
+                      goal?.status === 'submitted' ? 'default' :
+                      goal?.status === 'approved' || goal?.status === 'locked' ? 'outline' : 'destructive'
                     }>
-                      {goal.status}
+                      {goal?.status || 'unknown'}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    {goal.status === 'draft' && (
+                    {goal?.status === 'draft' && (
                       <div className="flex justify-end space-x-2">
                         <Button variant="ghost" size="icon" onClick={() => setEditingGoal(goal)}>
                           <Edit2 className="w-4 h-4" />
@@ -257,7 +261,7 @@ const MyGoals: React.FC = () => {
                   </TableCell>
                 </TableRow>
               ))}
-              {goals?.length === 0 && (
+              {(!goals || goals.length === 0) && (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-8 text-gray-500">
                     No goals created yet. Click "Add Goal" to start.
@@ -293,13 +297,13 @@ const MyGoals: React.FC = () => {
               onSubmit={handleUpdateGoal} 
               thrustAreas={thrustAreas || []} 
               initialValues={{
-                title: editingGoal.title,
-                description: editingGoal.description,
-                uom_type: editingGoal.uom_type,
-                target_value: editingGoal.target_value,
-                target_date: editingGoal.target_date,
-                weightage: editingGoal.weightage,
-                thrust_area_id: editingGoal.thrust_area_id,
+                title: editingGoal?.title,
+                description: editingGoal?.description,
+                uom_type: editingGoal?.uom_type,
+                target_value: editingGoal?.target_value,
+                target_date: editingGoal?.target_date,
+                weightage: editingGoal?.weightage,
+                thrust_area_id: editingGoal?.thrust_area_id,
               }}
               isLoading={updateMutation.isPending}
             />

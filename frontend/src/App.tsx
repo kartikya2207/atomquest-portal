@@ -37,38 +37,40 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route
-              path="/*"
-              element={
-                <ProtectedRoute>
-                  <AppShell>
-                    <Routes>
-                      <Route path="/" element={<Dashboard />} />
-                      <Route path="/goals" element={<MyGoals />} />
-                      <Route path="/checkin" element={<QuarterlyCheckin />} />
-                      <Route path="/approvals" element={<Approvals />} />
-                      <Route path="/team-checkins" element={<TeamCheckins />} />
-                      <Route path="/admin/shared-goals" element={<SharedGoals />} />
-                      <Route path="/admin/audit" element={<AuditLog />} />
-                      <Route path="/admin/users" element={<UserManagement />} />
-                      <Route path="/admin/cycles" element={<CycleManagement />} />
-                      <Route path="/analytics" element={<Analytics />} />
-                      <Route path="/admin/thrust-areas" element={<ThrustAreas />} />
-                      <Route path="/admin/reports" element={<Reports />} />
-                      {/* Other routes will be added in later phases */}
-                    </Routes>
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-          <Toaster position="top-right" />
-        </AuthProvider>
-      </BrowserRouter>
+      <ErrorBoundary>
+        <BrowserRouter>
+          <AuthProvider>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route
+                path="/*"
+                element={
+                  <ProtectedRoute>
+                    <AppShell>
+                      <Routes>
+                        <Route path="/" element={<Dashboard />} />
+                        <Route path="/goals" element={<MyGoals />} />
+                        <Route path="/checkin" element={<QuarterlyCheckin />} />
+                        <Route path="/approvals" element={<Approvals />} />
+                        <Route path="/team-checkins" element={<TeamCheckins />} />
+                        <Route path="/admin/shared-goals" element={<SharedGoals />} />
+                        <Route path="/admin/audit" element={<AuditLog />} />
+                        <Route path="/admin/users" element={<UserManagement />} />
+                        <Route path="/admin/cycles" element={<CycleManagement />} />
+                        <Route path="/analytics" element={<Analytics />} />
+                        <Route path="/admin/thrust-areas" element={<ThrustAreas />} />
+                        <Route path="/admin/reports" element={<Reports />} />
+                        {/* Other routes will be added in later phases */}
+                      </Routes>
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+            <Toaster position="top-right" />
+          </AuthProvider>
+        </BrowserRouter>
+      </ErrorBoundary>
     </QueryClientProvider>
   );
 }
