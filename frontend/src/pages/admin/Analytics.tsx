@@ -19,15 +19,28 @@ import {
 } from "recharts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { User } from "../../types";
+import { useAuth } from "../../contexts/AuthContext";
 
 const COLORS = ["#f97316", "#0ea5e9", "#22c55e", "#eab308", "#a855f7", "#ec4899"];
 
 const Analytics: React.FC = () => {
+  const { user: currentUser } = useAuth();
   const [selectedUserId, setSelectedUserId] = useState<string>("");
 
   const { data: users } = useQuery<User[]>({
-    queryKey: ["users"],
-    queryFn: async () => (await client.get("/users")).data,
+    queryKey: ["analyticsUsers", currentUser?.role],
+    queryFn: async () => {
+      if (currentUser?.role === "admin") {
+        return (await client.get("/users")).data;
+      }
+      // Managers: fetch team members + include self for QoQ analysis
+      const team: User[] = (await client.get("/users/team")).data;
+      if (currentUser && !team.some(u => u.id === currentUser.id)) {
+        return [currentUser as User, ...team];
+      }
+      return team;
+    },
+    enabled: !!currentUser,
   });
 
   React.useEffect(() => {

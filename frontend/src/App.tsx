@@ -14,6 +14,7 @@ import UserManagement from "./pages/admin/UserManagement";
 import CycleManagement from "./pages/admin/CycleManagement";
 import Analytics from "./pages/admin/Analytics";
 import Reports from "./pages/admin/Reports";
+import ThrustAreas from "./pages/admin/ThrustAreas";
 import AppShell from "./components/layout/AppShell";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -56,6 +57,7 @@ function App() {
                       <Route path="/admin/users" element={<UserManagement />} />
                       <Route path="/admin/cycles" element={<CycleManagement />} />
                       <Route path="/analytics" element={<Analytics />} />
+                      <Route path="/admin/thrust-areas" element={<ThrustAreas />} />
                       <Route path="/admin/reports" element={<Reports />} />
                       {/* Other routes will be added in later phases */}
                     </Routes>

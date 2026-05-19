@@ -101,8 +101,10 @@ const MyGoals: React.FC = () => {
     },
   });
 
-  const totalWeightage = goals?.filter(g => g.status === 'draft' || g.status === 'returned').reduce((sum, goal) => sum + goal.weightage, 0) || 0;
-  const isSubmitEnabled = totalWeightage === 100 && (goals?.length || 0) <= 8 && (goals?.length || 0) > 0;
+  const totalWeightage = goals?.reduce((sum, goal) => sum + goal.weightage, 0) || 0;
+  const draftReturnedGoals = goals?.filter(g => g.status === 'draft' || g.status === 'returned') || [];
+  const draftWeightage = draftReturnedGoals.reduce((sum, g) => sum + g.weightage, 0);
+  const isSubmitEnabled = draftWeightage === 100 && draftReturnedGoals.length > 0 && (goals?.length || 0) <= 8;
 
   const handleAddGoal = (values: GoalFormValues) => {
     if (!cycle) return;
