@@ -1,5 +1,5 @@
 import React from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,15 @@ const goalSchema = z.object({
   thrust_area_id: z.coerce.number().min(1, "Please select a thrust area"),
 });
 
-export type GoalFormValues = z.infer<typeof goalSchema>;
+export type GoalFormValues = {
+  title: string;
+  uom_type: "numeric_min" | "numeric_max" | "percent_min" | "percent_max" | "timeline" | "zero";
+  weightage: number;
+  thrust_area_id: number;
+  description?: string;
+  target_value?: number;
+  target_date?: string;
+};
 
 interface GoalFormProps {
   onSubmit: (values: GoalFormValues) => void;
@@ -39,7 +47,7 @@ interface GoalFormProps {
 
 const GoalForm: React.FC<GoalFormProps> = ({ onSubmit, initialValues, thrustAreas, isLoading, isShared }) => {
   const form = useForm<GoalFormValues>({
-    resolver: zodResolver(goalSchema),
+    resolver: zodResolver(goalSchema) as Resolver<GoalFormValues>,
     defaultValues: {
       title: initialValues?.title || "",
       description: initialValues?.description || "",
