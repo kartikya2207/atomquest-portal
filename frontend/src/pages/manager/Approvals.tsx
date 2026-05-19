@@ -163,7 +163,7 @@ const Approvals: React.FC = () => {
       )}
 
       <Dialog open={returnDialogOpen} onOpenChange={setReturnDialogOpen}>
-        <DialogContent>
+        <DialogContent className="bg-white shadow-2xl" style={{ zIndex: 9999 }}>
           <DialogHeader>
             <DialogTitle>Return for Rework</DialogTitle>
             <DialogDescription>

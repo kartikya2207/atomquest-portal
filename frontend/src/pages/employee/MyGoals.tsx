@@ -153,7 +153,7 @@ const MyGoals: React.FC = () => {
               Add Goal
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl bg-white shadow-2xl" style={{ zIndex: 9999 }}>
             <DialogHeader>
               <DialogTitle>Add New Goal</DialogTitle>
               <DialogDescription>
@@ -270,7 +270,7 @@ const MyGoals: React.FC = () => {
 
       {/* Edit Dialog */}
       <Dialog open={!!editingGoal} onOpenChange={(open) => !open && setEditingGoal(null)}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl bg-white shadow-2xl" style={{ zIndex: 9999 }}>
           <DialogHeader>
             <DialogTitle>Edit Goal</DialogTitle>
             <DialogDescription>
