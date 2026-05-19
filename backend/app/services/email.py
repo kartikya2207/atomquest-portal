@@ -1,11 +1,14 @@
 import resend
 import os
+import logging
 from dotenv import load_dotenv
 from app.models.user import User
 
 load_dotenv()
 
 resend.api_key = os.getenv("RESEND_API_KEY")
+
+logger = logging.getLogger(__name__)
 
 def send_goal_notification(user: User, notification_type: str, comment: str = None):
     """
@@ -42,4 +45,4 @@ def send_goal_notification(user: User, notification_type: str, comment: str = No
 
         resend.Emails.send(params)
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        logger.error(f"Failed to send email: {e}")
