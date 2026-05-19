@@ -13,7 +13,6 @@ import {
   FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ThrustArea } from "../../types";
 
@@ -59,11 +58,34 @@ const GoalForm: React.FC<GoalFormProps> = ({ onSubmit, initialValues, thrustArea
     },
   });
 
+  React.useEffect(() => {
+    if (initialValues) {
+      form.reset({
+        title: initialValues.title || "",
+        description: initialValues.description || "",
+        uom_type: initialValues.uom_type || "numeric_min",
+        target_value: initialValues.target_value || 0,
+        target_date: initialValues.target_date || "",
+        weightage: initialValues.weightage || 10,
+        thrust_area_id: initialValues.thrust_area_id || 0,
+      });
+    }
+  }, [initialValues, form]);
+
+  const handleFormSubmit = async (values: GoalFormValues) => {
+    try {
+      await onSubmit(values);
+      form.reset();
+    } catch (error) {
+      console.error("Form submission error:", error);
+    }
+  };
+
   const uomType = form.watch("uom_type");
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="title"
@@ -99,24 +121,21 @@ const GoalForm: React.FC<GoalFormProps> = ({ onSubmit, initialValues, thrustArea
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Thrust Area</FormLabel>
-                <Select 
-                  onValueChange={field.onChange} 
-                  value={field.value?.toString()} 
-                  disabled={isShared}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select thrust area" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent className="z-[99999]" position="popper" sideOffset={4}>
+                <FormControl>
+                  <select
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    onChange={(e) => field.onChange(parseInt(e.target.value))}
+                    value={field.value}
+                    disabled={isShared}
+                  >
+                    <option value="">Select thrust area</option>
                     {thrustAreas.map((ta) => (
-                      <SelectItem key={ta.id} value={ta.id.toString()}>
+                      <option key={ta.id} value={ta.id}>
                         {ta.name}
-                      </SelectItem>
+                      </option>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </select>
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -128,25 +147,21 @@ const GoalForm: React.FC<GoalFormProps> = ({ onSubmit, initialValues, thrustArea
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Unit of Measure (UoM)</FormLabel>
-                <Select 
-                  onValueChange={field.onChange} 
-                  value={field.value} 
-                  disabled={isShared}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select UoM" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent className="z-[99999]" position="popper" sideOffset={4}>
-                    <SelectItem value="numeric_min">Numeric (Min is better)</SelectItem>
-                    <SelectItem value="numeric_max">Numeric (Max is better)</SelectItem>
-                    <SelectItem value="percent_min">Percent (Min is better)</SelectItem>
-                    <SelectItem value="percent_max">Percent (Max is better)</SelectItem>
-                    <SelectItem value="timeline">Timeline (Date-based)</SelectItem>
-                    <SelectItem value="zero">Zero-based (Binary)</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <select
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    onChange={field.onChange}
+                    value={field.value}
+                    disabled={isShared}
+                  >
+                    <option value="numeric_min">Numeric (Min is better)</option>
+                    <option value="numeric_max">Numeric (Max is better)</option>
+                    <option value="percent_min">Percent (Min is better)</option>
+                    <option value="percent_max">Percent (Max is better)</option>
+                    <option value="timeline">Timeline (Date-based)</option>
+                    <option value="zero">Zero-based (Binary)</option>
+                  </select>
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
