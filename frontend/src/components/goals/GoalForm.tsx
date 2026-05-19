@@ -109,7 +109,7 @@ const GoalForm: React.FC<GoalFormProps> = ({ onSubmit, initialValues, thrustArea
                       <SelectValue placeholder="Select thrust area" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent className="z-[99999]">
+                  <SelectContent className="z-[99999]" position="popper" sideOffset={4}>
                     {thrustAreas.map((ta) => (
                       <SelectItem key={ta.id} value={ta.id.toString()}>
                         {ta.name}
@@ -138,7 +138,7 @@ const GoalForm: React.FC<GoalFormProps> = ({ onSubmit, initialValues, thrustArea
                       <SelectValue placeholder="Select UoM" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent className="z-[99999]">
+                  <SelectContent className="z-[99999]" position="popper" sideOffset={4}>
                     <SelectItem value="numeric_min">Numeric (Min is better)</SelectItem>
                     <SelectItem value="numeric_max">Numeric (Max is better)</SelectItem>
                     <SelectItem value="percent_min">Percent (Min is better)</SelectItem>
