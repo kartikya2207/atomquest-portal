@@ -115,14 +115,25 @@ const MyGoals: React.FC = () => {
   const draftWeightage = draftReturnedGoals.reduce((sum, g) => sum + g.weightage, 0);
   const isSubmitEnabled = draftWeightage === 100 && draftReturnedGoals.length > 0 && (goals?.length || 0) <= 8;
 
-  const handleAddGoal = (values: GoalFormValues) => {
-    if (!cycle) return;
-    createMutation.mutate({ ...values, cycle_id: cycle.id });
+  const handleAddGoal = async (values: GoalFormValues) => {
+    try {
+      if (!cycle) {
+        toast.error("No active cycle found");
+        return;
+      }
+      await createMutation.mutateAsync({ ...values, cycle_id: cycle.id });
+    } catch (error) {
+      console.error("Error in handleAddGoal:", error);
+    }
   };
 
-  const handleUpdateGoal = (values: GoalFormValues) => {
-    if (!editingGoal) return;
-    updateMutation.mutate({ id: editingGoal.id, data: values });
+  const handleUpdateGoal = async (values: GoalFormValues) => {
+    try {
+      if (!editingGoal) return;
+      await updateMutation.mutateAsync({ id: editingGoal.id, data: values });
+    } catch (error) {
+      console.error("Error in handleUpdateGoal:", error);
+    }
   };
 
   if (isCycleLoading || isGoalsLoading) {
