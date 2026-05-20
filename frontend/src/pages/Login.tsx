@@ -17,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
+import { formatError } from "@/lib/utils";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -48,7 +49,7 @@ const Login: React.FC = () => {
       toast.success("Login successful");
       navigate("/");
     } catch (error: any) {
-      toast.error(error.response?.data?.detail || "Login failed");
+      toast.error(formatError(error.response?.data?.detail || "Login failed"));
     }
   };
 

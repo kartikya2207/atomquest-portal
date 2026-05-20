@@ -31,6 +31,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, Edit2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { formatError } from "@/lib/utils";
 
 const UOM_LABELS: Record<string, string> = {
   numeric_min: "Higher is Better",
@@ -72,7 +73,7 @@ const MyGoals: React.FC = () => {
       setIsAddOpen(false);
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.detail || "Failed to create goal");
+      toast.error(formatError(error.response?.data?.detail || "Failed to create goal"));
     },
   });
 
@@ -84,7 +85,7 @@ const MyGoals: React.FC = () => {
       setEditingGoal(null);
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.detail || "Failed to update goal");
+      toast.error(formatError(error.response?.data?.detail || "Failed to update goal"));
     },
   });
 
@@ -95,7 +96,7 @@ const MyGoals: React.FC = () => {
       toast.success("Goal deleted successfully");
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.detail || "Failed to delete goal");
+      toast.error(formatError(error.response?.data?.detail || "Failed to delete goal"));
     },
   });
 
@@ -106,7 +107,7 @@ const MyGoals: React.FC = () => {
       toast.success("Goals submitted for approval");
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.detail || "Failed to submit goals");
+      toast.error(formatError(error.response?.data?.detail || "Failed to submit goals"));
     },
   });
 
