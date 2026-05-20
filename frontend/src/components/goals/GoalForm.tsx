@@ -74,7 +74,18 @@ const GoalForm: React.FC<GoalFormProps> = ({ onSubmit, initialValues, thrustArea
 
   const handleFormSubmit = async (values: GoalFormValues) => {
     try {
-      await onSubmit(values);
+      const payload = {
+        title: values.title,
+        description: values.description,
+        thrust_area_id: Number(values.thrust_area_id),
+        uom_type: values.uom_type,
+        weightage: Number(values.weightage),
+        ...(values.uom_type === "timeline"
+          ? (values.target_date ? { target_date: values.target_date } : {})
+          : (values.uom_type !== "zero" ? { target_value: Number(values.target_value) } : {}))
+      };
+
+      await onSubmit(payload as GoalFormValues);
       form.reset();
     } catch (error) {
       console.error("Form submission error:", error);
