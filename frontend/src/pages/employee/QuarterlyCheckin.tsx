@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Clock } from "lucide-react";
+import { formatError } from "@/lib/utils";
 
 const UOM_LABELS: Record<string, string> = {
   numeric_min: "Higher is Better",
@@ -41,7 +42,7 @@ const QuarterlyCheckin: React.FC = () => {
       toast.success("Achievement saved");
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.detail || "Failed to save achievement");
+      toast.error(formatError(error.response?.data?.detail || "Failed to save achievement"));
     },
   });
 
@@ -49,13 +50,9 @@ const QuarterlyCheckin: React.FC = () => {
     if (!cycle) return null;
     const today = new Date();
     if (today >= new Date(cycle.goal_setting_open) && today <= new Date(cycle.goal_setting_close)) {
-      // Actually window for q1 might be different, but for now let's use the logic from service
-      // Wait, I'll just rely on the backend to tell me if window is open if I had an endpoint for it.
-      // For now, let's hardcode today's check based on cycle dates.
       if (today >= new Date("2026-05-01") && today <= new Date("2026-06-30")) return "q1";
       if (today >= new Date("2026-07-01") && today <= new Date("2026-09-30")) return "q2";
     }
-    // Simple fallback for demo
     return "q1"; 
   };
 

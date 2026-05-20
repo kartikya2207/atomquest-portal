@@ -15,6 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Upload, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { formatError } from "@/lib/utils";
 
 const UserManagement: React.FC = () => {
   const queryClient = useQueryClient();
@@ -39,7 +40,7 @@ const UserManagement: React.FC = () => {
       setIsUploading(false);
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.detail || "Failed to import users");
+      toast.error(formatError(error.response?.data?.detail || "Failed to import users"));
       setIsUploading(false);
     },
   });
