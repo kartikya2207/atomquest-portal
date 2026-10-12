@@ -1,294 +1,104 @@
-# AtomQuest — Strategic Performance Management Portal
+# AtomQuest — Goal Setting & Tracking Portal
 
-> Replace fragmented spreadsheets with an audit-ready, role-based goal-setting and tracking platform aligned to Atomberg's strategic thrust areas.
+A role-based web portal (FastAPI + React) that replaces spreadsheet-based goal tracking with a structured, audit-ready workflow — built solo for Atomberg Hackathon 1.0.
 
-[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://atomquest-portal-theta.vercel.app)
-[![FastAPI](https://img.shields.io/badge/backend-FastAPI-009688)](https://fastapi.tiangolo.com)
-[![React](https://img.shields.io/badge/frontend-React%2019-61dafb)](https://react.dev)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+**Live demo:** [atomquest-portal-theta.vercel.app](https://atomquest-portal-theta.vercel.app)
 
----
+| Role | Email | Password |
+|---|---|---|
+| Employee | `anjali.iyer@atomberg.com` | `***REMOVED***` |
+| Manager | `priya.sharma@atomberg.com` | `***REMOVED***` |
+| Admin | `admin@atomberg.com` | `***REMOVED***` |
 
-## Live Demo
+(These are seeded demo accounts from `backend/seed.py`.)
 
-**URL:** [https://atomquest-portal-theta.vercel.app](https://atomquest-portal-theta.vercel.app)
+## What it is
 
-| Role | Email | Password | What you can do |
-|---|---|---|---|
-| **Employee** | `anjali.iyer@atomberg.com` | `***REMOVED***` | Create goals, log quarterly achievements, view own analytics |
-| **Manager** | `priya.sharma@atomberg.com` | `***REMOVED***` | Approve / return team goal sheets, leave check-in feedback, view team analytics |
-| **Admin** | `admin@atomberg.com` | `***REMOVED***` | Full org control — manage cycles, users, shared goals, audit log, export reports |
+The hackathon brief was an in-house goal-setting portal for Atomberg Technologies. Employees set yearly goals mapped to company "thrust areas" (Sales Revenue, Product Quality, Customer NPS, Safety, ...), managers approve or return them, everyone logs quarterly achievements, and admins get org-wide analytics, an audit trail and Excel exports.
 
----
+- **Employee:** create goals, submit a goal sheet, log quarterly achievements, see own scores.
+- **Manager:** approve / return direct reports' goal sheets, leave per-goal check-in feedback, team analytics.
+- **Admin:** manage cycles and users, push shared goals to a department, unlock locked goals, view the audit log, download reports.
 
-## Features
+## What I did
 
-### Goal Management
-- **Six Unit-of-Measure (UoM) types** covering every business metric:
-  | UoM | Scoring logic | Example |
-  |---|---|---|
-  | `numeric_min` | `actual / target × 100` — exceeding the threshold scores higher | Sales Revenue ≥ ₹50L |
-  | `numeric_max` | `target / actual × 100` — staying below the ceiling scores higher | Dealer TAT ≤ 2 days |
-  | `percent_min` | Same as `numeric_min` but percentage-native | Achievement Rate ≥ 90% |
-  | `percent_max` | Same as `numeric_max` but percentage-native | Defect Rate ≤ 2% |
-  | `timeline` | 100% if completed on or before the target date, else 0% | SKU launch by Sep 30 |
-  | `zero` | 100% if actual is exactly zero, else 0% | Safety incidents = 0 |
-- **Validation engine:** weightage sum must equal 100%, max 8 goals, minimum 10% per goal
-- **Status workflow:** `Draft` → `Submitted` → `Locked` (approved) or `Returned` (rework)
-- **Goal unlock:** Admin can reopen a locked goal with an audit reason
+I wrote a detailed build spec first ([`INSTRUCTIONS.md`](INSTRUCTIONS.md)): locked tech stack, data model, phases, and an explicit "what we rejected and why" section (e.g. SSO and an escalation scheduler were cut because they'd cost hours and be hard to demo). I then built it phase by phase with AI coding assistants (Claude Code / Gemini CLI) working from that spec, and spent a lot of the time reviewing, testing and fixing.
 
-### Strategic Alignment
-- **Thrust area mapping:** every goal links to a strategic pillar (Sales Revenue, Product Quality, Customer NPS, Energy Efficiency, On-time Delivery, Cost Reduction, Safety, Innovation & R&D)
-- **Shared goals:** Admins / Managers push a goal to an entire department; all recipients get an auto-locked copy
-- **Achievement sync:** the designated primary owner's quarterly log propagates to all shared copies
+**Backend (FastAPI, SQLAlchemy, Alembic, PostgreSQL)**
+- JWT auth (python-jose, bcrypt via passlib) with role guards in `deps.py`; managers only see their direct reports.
+- Goal workflow `Draft -> Submitted -> Locked / Returned`, with validation on submit: weightages must sum to exactly 100, at most 8 goals, at least 10% per goal.
+- Scoring for six unit-of-measure types in `services/score.py`, capped at 100%:
 
-### Governance & Audit
-- **Immutable audit trail:** every status change, approval, unlock, and manager edit is stored with a JSON snapshot of old/new values, the actor, and an optional reason
-- **RBAC:** Managers see only their direct reports; Admins have org-wide visibility
-- **Check-in feedback:** Managers leave per-goal, per-quarter comments visible to employees
+  | UoM | Score |
+  |---|---|
+  | `numeric_min` / `percent_min` | `actual / target x 100` (higher is better) |
+  | `numeric_max` / `percent_max` | `target / actual x 100` (lower is better) |
+  | `timeline` | 100 if done on or before the target date, else 0 |
+  | `zero` | 100 if actual is exactly 0 (e.g. safety incidents), else 0 |
 
-### Analytics & Reporting
-- **Dashboard (role-aware):** Employees see personal weightage and Q1 score; Managers see team pending approvals and team average score; Admins see org-wide totals
-- **Org health:** completion rate (users with at least one locked goal vs total users)
-- **QoQ performance:** line chart of per-employee quarterly average scores
-- **Department performance:** bar chart of average score by department, manager-scoped for Managers
-- **Thrust area distribution:** donut chart of goal count per strategic pillar
-- **Completion heatmap:** department × quarter grid showing % of goals with logged achievements
-- **Excel export:** admin can download a master `xlsx` with all goals and Q1 scores via `pandas` + `openpyxl`
-- **Email notifications:** automated alerts on goal submission, approval, and return via Resend
+- Quarterly check-in windows per cycle (`services/window.py`), so achievements can only be logged while a quarter is open.
+- Shared goals: an admin/manager pushes one goal to many people; the primary owner's achievements sync to all copies.
+- An `AuditLog` table storing JSON snapshots of old/new values, the actor and a reason for approvals, returns, unlocks and edits.
+- Excel export with pandas + openpyxl, and email notifications through Resend sent as FastAPI background tasks.
 
----
+**Frontend (React + TypeScript + Vite, Tailwind, shadcn/ui, TanStack Query, React Hook Form + Zod, Recharts)**
+- Role-aware dashboard and sidebar; pages per role under `src/pages/{employee,manager,admin}`.
+- Analytics: quarter-over-quarter scores, department performance, thrust-area distribution, and a department x quarter completion heatmap.
 
-## Tech Stack
+**Deployment:** frontend on Vercel, backend as a Docker container on Railway, database on Supabase. Architecture diagram: [`docs/architecture-diagram.png.png`](docs/architecture-diagram.png.png).
 
-| Layer | Technology | Version | Why |
-|---|---|---|---|
-| **Backend framework** | FastAPI | latest | Async Python with native Pydantic validation, auto-generated OpenAPI docs, and near-zero boilerplate for dependency injection |
-| **ORM & migrations** | SQLAlchemy + Alembic | 2.x | Declarative models, robust relationship handling, and schema-diff migrations out of the box |
-| **Database** | PostgreSQL | 15 | ACID compliance and JSON column support needed for the audit log's value snapshots |
-| **Auth** | python-jose + passlib | — | Industry-standard JWT signing (HS256) with bcrypt password hashing |
-| **Email** | Resend | latest | Simple REST API with generous free tier; no SMTP configuration required |
-| **Frontend library** | React | 19.2 | Component model scales well for a multi-role SPA with complex state per page |
-| **Build tool** | Vite | 8.x | Sub-second HMR and native ESM for fast iterative development |
-| **Language** | TypeScript | ~6.0 | Catches interface mismatches between API responses and UI components at compile time |
-| **Styling** | Tailwind CSS | 3.4 | Utility-first approach eliminates context-switching between CSS files |
-| **UI components** | shadcn/ui + Radix UI | — | Accessible, headless primitives styled with Tailwind; no runtime CSS-in-JS overhead |
-| **Server state** | TanStack Query | 5.x | Automatic caching, background refetching, and invalidation removes manual loading-state boilerplate |
-| **Forms** | React Hook Form + Zod | 7.x / 4.x | Uncontrolled inputs keep re-renders minimal; Zod schemas serve as single source of truth for validation |
-| **Charts** | Recharts | 3.x | SVG-based, composable, and works seamlessly inside responsive containers |
-| **HTTP client** | Axios | 1.x | Interceptor pattern for attaching JWT headers and handling 401 redirects globally |
-| **Routing** | React Router DOM | 7.x | File-free, declarative routing with nested layouts via `AppShell` |
+## What I learnt
 
----
+- **Writing the spec was the most valuable hour.** Pinning the stack, the data model and the rejected features up front stopped scope creep and made the AI-assisted coding far more predictable. Deciding what *not* to build was as useful as deciding what to build.
+- **Generated code still has to be debugged by a human.** About 20 of the commits are fixes: white-screen crashes from null data, "React error 31" from rendering an object as JSX, dropdowns hidden behind a modal (z-index), a TypeScript generic mismatch in the goal form, a bcrypt version issue in deployment. Most of these were integration bugs between frontend assumptions and API responses — shared types or an OpenAPI-generated client would have prevented many of them.
+- **Secrets hygiene.** I committed `.env` files early on and only removed them from tracking later. Untracking a file doesn't remove it from git history, so anything that was ever committed has to be treated as leaked and rotated. Now I set up `.gitignore` and `.env.example` *before* the first commit.
+- **Audit-first design pays off.** Writing an audit row for every state change made the approval workflow much easier to reason about and debug.
+- **What's still missing:** there are no automated tests (I relied on manual testing through the UI), thrust areas are read-only in the admin panel, manager scoping is one level deep (no sub-team roll-up), achievements are entered one at a time, and table-heavy pages need horizontal scroll on mobile. Email uses Resend's sandbox sender, so delivery to the fake demo addresses isn't guaranteed. Tests for the scoring and workflow logic would be my first addition.
 
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Vercel Edge Network                       │
-│  React 19 SPA  ──  Vite build  ──  vercel.json (SPA rewrite)│
-└──────────────────────────┬──────────────────────────────────┘
-                           │  HTTPS / JSON (Axios)
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    Railway (Docker)                          │
-│  FastAPI  ──  Uvicorn  ──  CORS (FRONTEND_ORIGIN env var)   │
-│  ├── /api/auth        JWT login & token validation           │
-│  ├── /api/goals       CRUD + approval workflow               │
-│  ├── /api/dashboard   Role-aware summary stats               │
-│  ├── /api/analytics   Org / team / employee metrics          │
-│  ├── /api/reports     Excel export (pandas)                  │
-│  └── /api/* ...       cycles, users, thrust-areas, audit     │
-└──────────────────────────┬──────────────────────────────────┘
-                           │  SQLAlchemy + psycopg2
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│                 Supabase (PostgreSQL 15)                     │
-│  Users · Goals · Cycles · ThrustAreas · Achievements        │
-│  Checkins · AuditLog                                        │
-└─────────────────────────────────────────────────────────────┘
-                           │
-                           ▼ (background task)
-┌─────────────────────────────────────────────────────────────┐
-│                      Resend                                  │
-│  Transactional email on goal submission / approval / return  │
-└─────────────────────────────────────────────────────────────┘
-```
-
-**Key design decisions:**
-- **Stateless auth:** JWT with 24-hour expiry; no server-side session store
-- **Background tasks:** email notifications are dispatched via FastAPI `BackgroundTasks` so API responses are never blocked by SMTP
-- **Monolith with scoped services:** a single FastAPI app with separate service modules (`score.py`, `email.py`, `excel.py`) for testability without microservice overhead
-- **Audit-first:** every approval, unlock, and return writes an immutable `AuditLog` row with JSON snapshots before committing the state change
-
----
-
-## Folder Structure
+## Repo structure
 
 ```
 atomquest-portal/
 ├── backend/
 │   ├── app/
-│   │   ├── auth/              # JWT token creation & password hashing
-│   │   ├── models/            # SQLAlchemy ORM models (User, Goal, Cycle…)
-│   │   ├── routes/            # FastAPI routers (one file per domain)
-│   │   ├── schemas/           # Pydantic request / response schemas
-│   │   ├── services/          # Business logic: score.py, email.py, excel.py
-│   │   ├── utils/             # audit.py — AuditLog helper
-│   │   ├── database.py        # Engine, SessionLocal, Base
-│   │   ├── deps.py            # get_current_user, require_role
-│   │   └── main.py            # App factory, CORS, router registration
-│   ├── alembic/               # Auto-generated migration scripts
-│   ├── Dockerfile             # python:3.11-slim image for Railway
-│   ├── requirements.txt       # Python dependencies
-│   ├── seed.py                # Populates demo users, goals, and achievements
-│   └── .env.example           # Environment variable template
+│   │   ├── auth/        JWT + password hashing, login route
+│   │   ├── models/      SQLAlchemy models: user, cycle, thrust_area, goal, achievement, checkin, audit_log
+│   │   ├── schemas/     Pydantic request/response models
+│   │   ├── routes/      one router per domain (goals, checkins, analytics, reports, audit, ...)
+│   │   ├── services/    score.py, window.py, email.py, excel.py
+│   │   ├── utils/       audit-log helper
+│   │   └── main.py      app, CORS, router registration
+│   ├── alembic/         migrations
+│   ├── seed.py          demo users, goals, achievements
+│   ├── Dockerfile
+│   └── .env.example
 ├── frontend/
-│   ├── src/
-│   │   ├── api/               # client.ts (Axios + interceptors), users.ts
-│   │   ├── components/
-│   │   │   ├── goals/         # GoalForm.tsx — shared create/edit form
-│   │   │   ├── layout/        # AppShell.tsx — sidebar + role-filtered nav
-│   │   │   └── ui/            # shadcn/ui primitives
-│   │   ├── contexts/          # AuthContext.tsx — user + token state
-│   │   ├── hooks/             # useCurrentCycle.ts
-│   │   ├── pages/
-│   │   │   ├── admin/         # Analytics, AuditLog, CycleManagement,
-│   │   │   │                  # Reports, SharedGoals, ThrustAreas,
-│   │   │   │                  # UserManagement
-│   │   │   ├── employee/      # MyGoals, QuarterlyCheckin
-│   │   │   └── manager/       # Approvals, TeamCheckins
-│   │   ├── types/             # index.ts — shared TypeScript interfaces
-│   │   ├── App.tsx            # Router tree
-│   │   └── main.tsx           # React root
-│   ├── vercel.json            # Rewrites all paths to index.html for SPA
-│   └── .env.example           # Frontend environment variable template
-└── docs/
-    └── architecture-diagram.png
+│   ├── src/  api/ components/ contexts/ hooks/ pages/ types/
+│   ├── vercel.json      SPA rewrites
+│   └── .env.example
+├── docs/                architecture diagram
+└── INSTRUCTIONS.md      the build spec I wrote before coding
 ```
 
----
+## How to run
 
-## Local Setup
-
-### Prerequisites
-
-- Python 3.11+
-- Node.js 18+
-- A PostgreSQL database (local install, Docker, or a free Supabase project)
-
-### 1. Clone
+Prerequisites: Python 3.11+, Node.js 18+, and a PostgreSQL database (local, Docker or Supabase).
 
 ```bash
-git clone https://github.com/your-org/atomquest-portal.git
-cd atomquest-portal
-```
-
-### 2. Backend
-
-```bash
+# Backend
 cd backend
-python -m venv venv
-source venv/bin/activate      # Windows: venv\Scripts\activate
+python -m venv venv && source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-```
-
-Copy the environment template and fill in your values:
-
-```bash
-cp .env.example .env
-# then edit .env
-```
-
-Run migrations and seed the demo dataset:
-
-```bash
+cp .env.example .env        # set DATABASE_URL, JWT_SECRET, RESEND_API_KEY, FRONTEND_ORIGIN
 alembic upgrade head
 python seed.py
-```
+uvicorn app.main:app --reload    # API on :8000, docs at /docs
 
-Start the development server:
-
-```bash
-uvicorn app.main:app --reload
-# API available at http://localhost:8000
-# Interactive docs at http://localhost:8000/docs
-```
-
-### 3. Frontend
-
-```bash
-cd ../frontend
+# Frontend (new terminal)
+cd frontend
 npm install
-cp .env.example .env
-# .env already points to http://localhost:8000/api — no edits needed for local dev
-npm run dev
-# App available at http://localhost:5173
+cp .env.example .env        # VITE_API_URL, defaults to http://localhost:8000/api
+npm run dev                 # http://localhost:5173
 ```
 
----
-
-## Environment Variables
-
-### Backend (`backend/.env`)
-
-| Variable | Description | Example placeholder |
-|---|---|---|
-| `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:password@host:5432/atomquest` |
-| `JWT_SECRET` | Random secret for signing access tokens (min 32 chars) | `your-random-256-bit-secret-here` |
-| `RESEND_API_KEY` | API key from [resend.com](https://resend.com) | `re_your_resend_key_here` |
-| `FRONTEND_ORIGIN` | Allowed CORS origin in production | `https://your-vercel-deployment.vercel.app` |
-
-### Frontend (`frontend/.env`)
-
-| Variable | Description | Example placeholder |
-|---|---|---|
-| `VITE_API_URL` | Base URL for the backend API | `https://your-railway-backend.up.railway.app/api` |
-
-> **Never commit real values.** Both `.env` files are in `.gitignore`. Only `.env.example` files (with placeholder values) are tracked.
-
----
-
-## Deployment
-
-### Frontend → Vercel
-
-1. Import the `frontend/` folder as a Vercel project
-2. Set `VITE_API_URL` in Vercel's Environment Variables settings
-3. Vercel auto-detects Vite; the `vercel.json` handles SPA routing rewrites
-
-### Backend → Railway
-
-1. Create a new Railway project from the `backend/` directory
-2. Railway auto-detects the `Dockerfile`
-3. Set all four backend environment variables in Railway's Variables tab
-4. Copy the generated Railway URL and paste it into Vercel's `VITE_API_URL` and Railway's own `FRONTEND_ORIGIN`
-
-### Database → Supabase
-
-1. Create a new Supabase project and copy the **direct connection string** (not the pooler) from Project Settings → Database
-2. Set it as `DATABASE_URL` in Railway
-3. Run `alembic upgrade head` once (via Railway's shell or a local connection to the remote DB)
-4. Run `python seed.py` to populate demo data
-
----
-
-## Project Status & Known Limitations
-
-| Area | Status | Notes |
-|---|---|---|
-| Goal CRUD & approval workflow | ✅ Complete | All statuses: Draft, Submitted, Locked, Returned |
-| Role-based dashboards | ✅ Complete | Employee / Manager / Admin each see role-appropriate stats |
-| Analytics (all charts) | ✅ Complete | QoQ, dept performance, thrust distribution, heatmap |
-| Shared goals | ✅ Complete | Push to multiple users; primary owner syncs achievements |
-| Audit log | ✅ Complete | Immutable, JSON snapshots, filterable by admin |
-| Excel export | ✅ Complete | Master data sheet with all goals and Q1 scores |
-| Email notifications | ⚠️ Sandbox | Uses Resend's `onboarding@resend.dev` sender; demo users have fake emails so delivery is not guaranteed |
-| Manager hierarchy | ⚠️ One level | Team scoping is limited to direct reports; no recursive sub-team roll-up |
-| Thrust area CRUD | 🔲 Read-only | Admin can view thrust areas; create/edit/deactivate via admin panel is not yet wired |
-| Bulk achievement log | 🔲 Not implemented | Achievements must be entered one at a time per goal per quarter |
-| Mobile layout | 🔲 Partial | Sidebar collapses on mobile; table-heavy pages require horizontal scroll |
-
----
-
-Built for **Atomberg Hackathon 1.0** — May 2026.
+**Deploying:** import `frontend/` into Vercel and set `VITE_API_URL`; deploy `backend/` to Railway (it picks up the Dockerfile) with the four backend env vars; use Supabase's direct connection string as `DATABASE_URL`, then run `alembic upgrade head` and `python seed.py` once against it.
