@@ -4,13 +4,7 @@ A role-based web portal (FastAPI + React) that replaces spreadsheet-based goal t
 
 **Live demo:** [atomquest-portal-theta.vercel.app](https://atomquest-portal-theta.vercel.app)
 
-| Role | Email | Password |
-|---|---|---|
-| Employee | `anjali.iyer@atomberg.com` | `***REMOVED***` |
-| Manager | `priya.sharma@atomberg.com` | `***REMOVED***` |
-| Admin | `admin@atomberg.com` | `***REMOVED***` |
-
-(These are seeded demo accounts from `backend/seed.py`.)
+Demo credentials available on request.
 
 ## What it is
 

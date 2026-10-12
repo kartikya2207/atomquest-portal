@@ -7,6 +7,7 @@ from app.schemas.user import UserOut
 from app.deps import get_current_user, require_role
 from app.services.excel import parse_user_upload
 from app.auth.utils import get_password_hash
+import os
 import uuid
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -38,7 +39,7 @@ async def bulk_upload_users(
                 role=UserRole(row.get("role", "employee")),
                 department=row.get("department"),
                 designation=row.get("designation"),
-                password_hash=get_password_hash("***REMOVED***") # Default for hackathon
+                password_hash=get_password_hash(os.environ.get("DEFAULT_USER_PASSWORD") or temp_password)  # env-configured default, else random temp password
             )
             db.add(user)
         else:

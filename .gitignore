@@ -1,6 +1,9 @@
 # Environment variables
-backend/.env
-frontend/.env
+.env
+.env.*
+**/.env
+**/.env.*
+!**/.env.example
 
 # Python
 backend/venv/

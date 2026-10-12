@@ -611,7 +611,7 @@ Create `backend/seed.py` that inserts the data in Section 9. Run it once. From t
 
 ## 9. Seed Data (`backend/seed.py`)
 
-### Users (passwords all `***REMOVED***` for demo)
+### Users (demo password read from the `SEED_DEMO_PASSWORD` env var; demo credentials available on request)
 | Email | Role | Manager | Department | Designation |
 |---|---|---|---|---|
 | admin@atomberg.com | admin | — | HR | HR Head |

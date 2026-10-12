@@ -2,6 +2,7 @@ from app.database import SessionLocal
 from app.models import User, UserRole, ThrustArea, Cycle, Goal, GoalStatus, UoMType, Achievement, AchievementStatus, Quarter, Checkin, AuditLog
 from app.auth.utils import get_password_hash
 from datetime import date, datetime, timedelta
+import os
 
 def seed():
     db = SessionLocal()
@@ -31,7 +32,10 @@ def seed():
         thrust_areas[name] = ta
 
     print("Seeding Users...")
-    password_hash = get_password_hash("***REMOVED***")
+    demo_password = os.environ.get("SEED_DEMO_PASSWORD")
+    if not demo_password:
+        raise SystemExit("Set SEED_DEMO_PASSWORD before running seed.py")
+    password_hash = get_password_hash(demo_password)
     
     user_data = [
         ("admin@atomberg.com", "Admin User", UserRole.ADMIN, None, "HR", "HR Head"),
