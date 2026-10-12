@@ -45,7 +45,11 @@ I wrote a detailed build spec first ([`INSTRUCTIONS.md`](INSTRUCTIONS.md)): lock
 - Role-aware dashboard and sidebar; pages per role under `src/pages/{employee,manager,admin}`.
 - Analytics: quarter-over-quarter scores, department performance, thrust-area distribution, and a department x quarter completion heatmap.
 
-**Deployment:** frontend on Vercel, backend as a Docker container on Railway, database on Supabase. Architecture diagram: [`docs/architecture-diagram.png.png`](docs/architecture-diagram.png.png).
+**Deployment:** frontend on Vercel, backend as a Docker container on Railway, database on Supabase.
+
+![AtomQuest deployment architecture](docs/architecture-diagram.png.png)
+
+*Deployment architecture: React frontend on Vercel → FastAPI backend on Railway → Supabase Postgres, with Resend for email.*
 
 ## What I learnt
 
